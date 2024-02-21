@@ -5,17 +5,17 @@ using namespace std;
 // computes julia fractal for specific coordinates
 double julia(long double x, long double y, double cx, double cy, double radius, int iter_depth) {
     int iteration = 0;
-    while (x * x + y * y < radius && iteration < iter_depth) {
+    while (x * x + y * y < radius) {
         double temp_x = x * x - y * y;
         y = 2 * x * y  + cy;
         x = temp_x + cx;
         iteration++;
-        if (iteration == iter_depth) return iteration;
+        if (iteration >= iter_depth) return iteration;
     }
-
     // smoothing formula
     double z = x * x + y * y;
-    return iteration + 1 - log(log(z))/log(2);
+    double ret = iteration + 1 - log(log(z))/log(2);
+    if (ret < 0) return 0; else return ret;
 }
 
 int main() {
