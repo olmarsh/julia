@@ -20,8 +20,8 @@ double julia(long double x, long double y, double cx, double cy, double radius, 
 
 int main() {
     double radius = 4;  // escape radius
-    int width = 800;  // screen dimensions
-    int height = 600;
+    int width = 1024;  // screen dimensions
+    int height = 1024;
 
     double re, im;
     double r_falloff = 15; double g_falloff = 100; double b_falloff = 500;
