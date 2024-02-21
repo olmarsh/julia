@@ -1,5 +1,5 @@
 cmake_minimum_required(VERSION 3.15)
-project(julia VERSION 0.1)
+project(julia VERSION 0.2.0)
 
 include_directories(lib/lodepng)
 add_library(

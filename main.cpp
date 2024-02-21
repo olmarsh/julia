@@ -3,15 +3,19 @@
 using namespace std;
 
 // computes julia fractal for specific coordinates
-int julia(long double x, long double y, double cx, double cy, double radius, int iter_depth) {
+double julia(long double x, long double y, double cx, double cy, double radius, int iter_depth) {
     int iteration = 0;
     while (x * x + y * y < radius && iteration < iter_depth) {
         double temp_x = x * x - y * y;
         y = 2 * x * y  + cy;
         x = temp_x + cx;
         iteration++;
+        if (iteration == iter_depth) return iteration;
     }
-    return iteration;
+
+    // smoothing formula
+    double z = x * x + y * y;
+    return iteration + 1 - log(log(z))/log(2);
 }
 
 int main() {
@@ -27,7 +31,7 @@ int main() {
     if (edit_format == 'y' or edit_format == 'Y') {
         cout << "width, height: ";
         cin >> width >> height;
-        cout << "rgb falloff (lower is brighter): ";
+        cout << "r,g,b falloff (lower is brighter): ";
         cin >> r_falloff >> g_falloff >> b_falloff;
     }
 
