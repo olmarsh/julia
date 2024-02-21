@@ -1,0 +1,16 @@
+# Directories
+.vscode/
+.vs/
+build/
+CMakeFiles/
+
+# Files
+*.vcxproj
+*.vcxproj.user
+*.vcxproj.filters
+*.sln
+*.log
+*.user
+*.make
+Makefile
+CMakeCache.txt
