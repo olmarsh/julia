@@ -3,14 +3,14 @@
 using namespace std;
 
 // computes julia fractal for specific coordinates
-double julia(long double x, long double y, double cx, double cy, double radius, int iter_depth, int nonescaping) {
+double julia(long double x, long double y, double cx, double cy, double radius, int iter_depth) {
     int iteration = 0;
     while (x * x + y * y < radius) {
         double temp_x = x * x - y * y;
         y = 2 * x * y  + cy;
         x = temp_x + cx;
         iteration++;
-        if (iteration >= iter_depth) return nonescaping;  // if the point never escaped
+        if (iteration >= iter_depth) return -1;  // if the point never escaped
     }
     // smoothing formula
     double z = x * x + y * y;
@@ -46,7 +46,8 @@ int main() {
     for (int i=0;i<width;i+=1) {
     for (int j=0;j<height;j+=1) {
         // computes julia fractal for the current pixel
-        double julia_result = julia(((double)i/(double)width)*4-2,((double)j/(double)height)*4-2,re,im,radius,1000,nonescaping);
+        double julia_result = julia(((double)i/(double)width)*4-2,((double)j/(double)height)*4-2,re,im,radius,1000);
+        if (julia_result == -1) julia_result = nonescaping;  // if non-escaping, set result to defined value
         // writes to image vector RGBA format
         image[4 * width * j + 4 * i + 0] = (unsigned char)((julia_result/(julia_result+r_falloff))*255);
         image[4 * width * j + 4 * i + 1] = (unsigned char)((julia_result/(julia_result+g_falloff))*255);
