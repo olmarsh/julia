@@ -27,6 +27,7 @@ int main() {
     double re, im;
     double r_falloff = 15; double g_falloff = 100; double b_falloff = 500;
     cout << "real, imaginary: "; cin >> re >> im;
+    cout << "output path (type '/' for default): "; string output_path = ""; cin >>output_path;
     char edit_format;
     cout << "edit output format? y/n: "; cin >> edit_format;
     if (edit_format == 'y' or edit_format == 'Y') {
@@ -58,8 +59,11 @@ int main() {
     vector<unsigned char> output;
     
     // encode and save
+    time_t cur_time = time(0);
+    stringstream filename;
+    filename << output_path << '/' << "julia_" << cur_time << ".png";
     lodepng::encode(output, image, width, height);
-    lodepng::save_file(output, "output.png");
+    lodepng::save_file(output, filename.str());
     cout << "Done";
     return 0;
 }
