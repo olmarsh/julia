@@ -1,0 +1,23 @@
+# Coordinates
+Real: -0.757
+Imaginary: 0.068
+
+# Size (pixels)
+Width: 1024 # Defaults to 1024
+Height: 1024 # Defaults to 1024
+
+# Colour - Lower is lighter
+# The value is used in the equation x / (x + falloff)
+RFalloff: 15 # Defaults to 15
+GFalloff: 100 # Defaults to 100
+BFalloff: 500 # Defaulst to 500
+
+# Value assigned to points that don't escape
+# Higher is lighter
+# Set to 1000 (iterDepth in Julia function) to prevent fireflies
+# Defaults to 0
+NonEscapingValue: 1000
+
+# Escape radius - The distance from it's start at which a point is considered "escaped"
+# Defaults to 4
+Radius: 4

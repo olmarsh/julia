@@ -1,7 +1,9 @@
 # Directories
 .vscode/
 .vs/
+.idea/
 build/
+cmake-build-debug/
 CMakeFiles/
 
 # Files
