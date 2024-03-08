@@ -22,6 +22,6 @@ NonEscapingValue: 1000
 # Defaults to 4
 Radius: 4
 
-# Output Path - Must end with a slash!
+# Output Path
 # Defaults to the CWD
-# OutputPath: ../../ # This will put the output files in 2 files up
+OutputPath: ../../ # This will put the output files 2 directories up
