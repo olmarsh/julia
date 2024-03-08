@@ -1,6 +1,6 @@
-# Coordinates
-Real: -0.757
-Imaginary: 0.068
+# Coordinates of the fractal
+Real: -0.757 # Defaults to -1
+Imaginary: 0.068 # Defaults to -1
 
 # Size (pixels)
 Width: 1024 # Defaults to 1024
@@ -12,11 +12,15 @@ RFalloff: 15 # Defaults to 15
 GFalloff: 100 # Defaults to 100
 BFalloff: 500 # Defaults to 500
 
-# Value assigned to points that don't escape
+# Brightness assigned to points that don't escape to infinity
 # Higher is lighter
-# Set to 1000 (iterDepth in Julia function) to prevent fireflies
+# Set to MaxIterations (normally 1000) to prevent fireflies
 # Defaults to 0
 NonEscapingValue: 1000
+
+# The number of times the Julia equation is run to determine if a point will escape
+# Defaults to 1000
+MaxIterations: 1000
 
 # Escape radius - The distance from its start at which a point is considered "escaped"
 # Defaults to 4
@@ -24,4 +28,4 @@ Radius: 4
 
 # Output Path
 # Defaults to the CWD
-OutputPath: ../../ # This will put the output files 2 directories up
+# OutputPath: ../../ # This will put the output files 2 directories up

@@ -1,0 +1,6 @@
+- Make colours more intuitive by using a plain RGB value
+- Make non escaping value multiply itself by MaxIteration automatically
+- Improve example config clarity
+- Allow making animations
+- Add config option to not fix abnormal aspect ratios
+- Add scale option

@@ -57,30 +57,37 @@ int main() {
 
     int width = GetConfigValue("Width", 1024);
     int height = GetConfigValue("Height", 1024);
+    double scale = GetConfigValue("Scale", 4.0);
 
     // Falloff values - change the colour of the fractal. Lower is brighter
-    double rFalloff = GetConfigValue("RFalloff", 15);
-    double gFalloff = GetConfigValue("GFalloff", 100);
-    double bFalloff = GetConfigValue("BFalloff", 500);
+    double rFalloff = GetConfigValue("RFalloff", 15.0);
+    double gFalloff = GetConfigValue("GFalloff", 100.0);
+    double bFalloff = GetConfigValue("BFalloff", 500.0);
 
     // Value to assign non-escaping points - 0 is darkest, 1000 is brightest
     int nonEscapingValue = GetConfigValue("NonEscapingValue", 0);
 
+    // Max iteration depth
+    int maxIterations = GetConfigValue("MaxIterations", 1000);
+
     // Escape radius
-    double radius = GetConfigValue("Radius", 4);
+    double radius = GetConfigValue("Radius", 4.0);
 
     // Output path
     filesystem::path outputPath = filesystem::path(GetConfigValue("OutputPath", filesystem::current_path().string()));
 
     // Compute the julia fractal for each pixel in image
     cout << "Computing...\n";
+    double aspectRatio = (double)width / (double)height;
     vector<unsigned char> image(width * height * 4);
     for (int i = 0; i < width; i++)
     {
         for (int j = 0; j < height; j++)
         {
             // Compute for current pixel
-            double result = Julia(((double)i / (double)width) * 4 - 2, ((double)j / (double)height) * 4 - 2, real, imaginary, radius, 1000);
+            double x = ((double)i / (double)width) * aspectRatio * 4 - 2 * aspectRatio;
+            double y = ((double)j / (double)height) * 4 - 2;
+            double result = Julia(x, y, real, imaginary, radius, maxIterations);
 
             // If non-escaping, set result to defined value
             if (result == -1)
