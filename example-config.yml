@@ -10,7 +10,7 @@ Height: 1024 # Defaults to 1024
 # The value is used in the equation x / (x + falloff)
 RFalloff: 15 # Defaults to 15
 GFalloff: 100 # Defaults to 100
-BFalloff: 500 # Defaulst to 500
+BFalloff: 500 # Defaults to 500
 
 # Value assigned to points that don't escape
 # Higher is lighter
@@ -18,6 +18,10 @@ BFalloff: 500 # Defaulst to 500
 # Defaults to 0
 NonEscapingValue: 1000
 
-# Escape radius - The distance from it's start at which a point is considered "escaped"
+# Escape radius - The distance from its start at which a point is considered "escaped"
 # Defaults to 4
 Radius: 4
+
+# Output Path - Must end with a slash!
+# Defaults to the CWD
+# OutputPath: ../../ # This will put the output files in 2 files up

@@ -52,8 +52,8 @@ int main() {
 
     Config = YAML::LoadFile("config.yml");
 
-    double real = GetConfigValue("Real", -1);
-    double imaginary = GetConfigValue("Imaginary", -1);
+    double real = GetConfigValue("Real", -1.0);
+    double imaginary = GetConfigValue("Imaginary", -1.0);
 
     int width = GetConfigValue("Width", 1024);
     int height = GetConfigValue("Height", 1024);
@@ -98,6 +98,8 @@ int main() {
     string path = outputPath.append("Julia_" + to_string(time(0)) + ".png").string();
     vector<unsigned char> output;
     lodepng::encode(output, image, width, height);
-    lodepng::save_file(output, outputPath.string());
-    cout << "Saved to file '" << outputPath.string() << "'\n";
+    if (lodepng::save_file(output, outputPath.string()) == 0)
+        cout << "Saved to file '" << outputPath.string() << "'\n";
+    else
+        cout << "Failed to save to file '" << outputPath.string() << "'\n";
 }
