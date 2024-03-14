@@ -73,20 +73,27 @@ int main() {
     // Escape radius
     double radius = GetConfigValue("Radius", 4.0);
 
+    // Border values
+    double minX = GetConfigValue("MinX", -2.0);
+    double maxX = GetConfigValue("MaxX", 2.0);
+    double minY = GetConfigValue("MinY", -2.0);
+    double maxY = GetConfigValue("MaxY", 2.0);
+
+
     // Output path
     filesystem::path outputPath = filesystem::path(GetConfigValue("OutputPath", filesystem::current_path().string()));
 
     // Compute the julia fractal for each pixel in image
     cout << "Computing...\n";
-    double aspectRatio = (double)width / (double)height;
+    //double aspectRatio = (double)width / (double)height;
     vector<unsigned char> image(width * height * 4);
     for (int i = 0; i < width; i++)
     {
         for (int j = 0; j < height; j++)
         {
             // Compute for current pixel
-            double x = ((double)i / (double)width) * aspectRatio * 4 - 2 * aspectRatio;
-            double y = ((double)j / (double)height) * 4 - 2;
+            double x = ((double)i / (double)width)  * (maxX-minX) + minX;
+            double y = ((double)j / (double)height) * (maxY-minY) + minY;
             double result = Julia(x, y, real, imaginary, radius, maxIterations);
 
             // If non-escaping, set result to defined value

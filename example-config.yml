@@ -26,6 +26,14 @@ MaxIterations: 1000
 # Defaults to 4
 Radius: 4
 
+# Border values - The values at the edges of the screen (used to change zoom, aspect ratio)
+# Max values must be greater than min values
+# Defaults to -2, 2 for both x and y
+MinX: -2
+MaxX: 2
+MinY: -2
+MaxY: 2
+
 # Output Path
 # Defaults to the CWD
 # OutputPath: ../../ # This will put the output files 2 directories up
