@@ -30,10 +30,34 @@ double Julia(long double x, long double y, double cx, double cy, double radius, 
     double z = x * x + y * y;
     double ret = iteration + 1 - log(log(z))/log(2);
 
-    if (ret < 0)
-        return 0;
-    else
-        return ret;
+    if (ret < 0) return 0;
+    return ret;
+}
+
+double MultiJulia(long double x, long double y, double n, double radius, int iterDepth)
+{
+    int iteration = 0;
+    double cx = x;
+    double cy = y;
+
+    while (x * x + y * y < radius)
+    {
+        double temp_x = pow((x * x + y * y), n/2) * cos(n * atan2(y, x)) + cx;
+        y = pow((x * x + y * y), n/2) * sin(n * atan2(y, x)) + cy;
+        x = temp_x;
+
+        iteration++;
+        // If the point never escaped
+        if (iteration >= iterDepth)
+            return -1;
+    }
+
+    // Smoothing formula
+    double z = x * x + y * y;
+    double ret = iteration + 1 - log(log(z))/log(2);
+
+    if (ret < 0) return 0;
+    return ret;
 }
 
 template <typename T>
@@ -52,12 +76,20 @@ int main() {
 
     Config = YAML::LoadFile("config.yml");
 
+    // Fractal type
+    int fractalType = GetConfigValue("FractalType", 0);
+
+    // Multijulia exponent
+    double exponent = GetConfigValue("Exponent", 2.0);
+
+    // Julia set parameters
     double real = GetConfigValue("Real", -1.0);
     double imaginary = GetConfigValue("Imaginary", -1.0);
 
+    // Size parameters
     int width = GetConfigValue("Width", 1024);
     int height = GetConfigValue("Height", 1024);
-    double scale = GetConfigValue("Scale", 4.0);
+    //double scale = GetConfigValue("Scale", 4.0);
 
     // Falloff values - change the colour of the fractal. Lower is brighter
     double rFalloff = GetConfigValue("RFalloff", 15.0);
@@ -79,7 +111,6 @@ int main() {
     double minY = GetConfigValue("MinY", -2.0);
     double maxY = GetConfigValue("MaxY", 2.0);
 
-
     // Output path
     filesystem::path outputPath = filesystem::path(GetConfigValue("OutputPath", filesystem::current_path().string()));
 
@@ -94,7 +125,10 @@ int main() {
             // Compute for current pixel
             double x = ((double)i / (double)width)  * (maxX-minX) + minX;
             double y = ((double)j / (double)height) * (maxY-minY) + minY;
-            double result = Julia(x, y, real, imaginary, radius, maxIterations);
+            double result;
+
+            if (fractalType == 1) result = MultiJulia(x, y, exponent, radius, maxIterations);
+            else result = Julia(x, y, real, imaginary, radius, maxIterations);
 
             // If non-escaping, set result to defined value
             if (result == -1)

@@ -1,6 +1,14 @@
-# Coordinates of the fractal
+# Fractal type
+# 0 - Julia - generates julia set using Real and Imaginary values
+# 1 - Multijulia - generates multijulia / multibrot set using MultiExponent value
+FractalType: 1
+
+# Coordinates of the fractal (Julia set only)
 Real: -0.757 # Defaults to -1
 Imaginary: 0.068 # Defaults to -1
+
+# Exponent of multijulia set (Multijulia set only)
+Exponent: 2 # Defaults to 2
 
 # Size (pixels)
 Width: 1024 # Defaults to 1024
