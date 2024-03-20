@@ -140,6 +140,7 @@ int main() {
             image[4 * width * j + 4 * i + 2] = (unsigned char)((result / (result + bFalloff)) * 255);
             image[4 * width * j + 4 * i + 3] = 255;
         }
+        cout << "\r             \r" << ((double)(int)(((double)i/(double)width)*10000))/100 << "%"; // Print percentage complete
     }
 
     // Encode and save
@@ -147,7 +148,7 @@ int main() {
     vector<unsigned char> output;
     lodepng::encode(output, image, width, height);
     if (lodepng::save_file(output, outputPath.string()) == 0)
-        cout << "Saved to file '" << outputPath.string() << "'\n";
+        cout << "\r             \rSaved to file '" << outputPath.string() << "'\n";
     else
-        cout << "Failed to save to file '" << outputPath.string() << "'\n";
+        cout << "\r             \rFailed to save to file '" << outputPath.string() << "'\n";
 }
