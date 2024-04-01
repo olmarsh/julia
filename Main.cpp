@@ -5,36 +5,53 @@
 #include <lodepng.h>
 #include <yaml-cpp/yaml.h>
 
+typedef float float32;
+typedef double float64;
+
+typedef int8_t int8;
+typedef int16_t int16;
+typedef int32_t int32;
+typedef int64_t int64;
+
+typedef uint8_t uint8;
+typedef uint16_t uint16;
+typedef uint32_t uint32;
+typedef uint64_t uint64;
+
 using namespace std;
-using namespace YAML;
 
-Node Config;
+YAML::Node Config;
 
-double Julia(long double x, long double y, double cx, double cy, double radius, int iterDepth)
+enum class FractalType
 {
-    int iteration = 0;
+    Julia,
+    MultiJulia,
+};
+
+float64 Julia(float64 x, float64 y, float64 cx, float64 cy, float64 radius, int32 iterationDepth)
+{
+    int32 iteration = 0;
 
     while (x * x + y * y < radius)
     {
-        double temp_x = x * x - y * y;
+        float64 tempX = x * x - y * y;
         y = 2 * x * y  + cy;
-        x = temp_x + cx;
+        x = tempX + cx;
         iteration++;
 
         // If the point never escaped
-        if (iteration >= iterDepth)
+        if (iteration >= iterationDepth)
             return -1;
     }
 
     // Smoothing formula
-    double z = x * x + y * y;
-    double ret = iteration + 1 - log(log(z))/log(2);
+    float64 z = x * x + y * y;
+    float64 ret = iteration + 1 - log(log(z)) / log(2);
 
-    if (ret < 0) return 0;
-    return ret;
+    return ret < 0 ? 0 : ret;
 }
 
-double MultiJulia(long double x, long double y, double n, double radius, int iterDepth)
+double MultiJulia(long double x, long double y, double n, double radius, int iterationDepth)
 {
     int iteration = 0;
     double cx = x;
@@ -42,31 +59,30 @@ double MultiJulia(long double x, long double y, double n, double radius, int ite
 
     while (x * x + y * y < radius)
     {
-        double temp_x = pow((x * x + y * y), n/2) * cos(n * atan2(y, x)) + cx;
-        y = pow((x * x + y * y), n/2) * sin(n * atan2(y, x)) + cy;
-        x = temp_x;
-
+        double tempX = pow((x * x + y * y), n / 2) * cos(n * atan2(y, x)) + cx;
+        y = pow((x * x + y * y), n / 2) * sin(n * atan2(y, x)) + cy;
+        x = tempX;
         iteration++;
+
         // If the point never escaped
-        if (iteration >= iterDepth)
+        if (iteration >= iterationDepth)
             return -1;
     }
 
     // Smoothing formula
     double z = x * x + y * y;
-    double ret = iteration + 1 - log(log(z))/log(2);
+    double ret = iteration + 1 - log(log(z)) / log(2);
 
-    if (ret < 0) return 0;
-    return ret;
+    return ret < 0 ? 0 : ret;
 }
 
-template <typename T>
+template<typename T>
 T GetConfigValue(const string& key, T defaultValue)
 {
     return Config[key] ? Config[key].as<T>() : defaultValue;
 }
 
-int main() {
+int32 main() {
     // Get input from the config
     if (!filesystem::exists("config.yml"))
     {
@@ -76,77 +92,111 @@ int main() {
 
     Config = YAML::LoadFile("config.yml");
 
-    // Fractal type
-    int fractalType = GetConfigValue("FractalType", 0);
+#pragma region Parameters
 
-    // Multijulia exponent
-    double exponent = GetConfigValue("Exponent", 2.0);
+    // === Fractal Parameters === //
+    float64 real = GetConfigValue("Real", 0.0);
+    float64 imaginary = GetConfigValue("Imaginary", 0.0);
+    string fractalTypeString = GetConfigValue("FractalType", (string)"Julia");
+    float64 multiJuliaExponent = GetConfigValue("MultiJuliaExponent", 2.0);
 
-    // Julia set parameters
-    double real = GetConfigValue("Real", -1.0);
-    double imaginary = GetConfigValue("Imaginary", -1.0);
+    FractalType fractalType;
+    if (fractalTypeString == "Julia")
+        fractalType = FractalType::Julia;
+    else if (fractalTypeString == "MultiJulia")
+        fractalType = FractalType::MultiJulia;
+    else
+    {
+        cout << format("Fatal Error: FractalType '{}' is invalid", fractalTypeString);
+        return -1;
+    }
 
-    // Size parameters
-    int width = GetConfigValue("Width", 1024);
-    int height = GetConfigValue("Height", 1024);
-    //double scale = GetConfigValue("Scale", 4.0);
+    // === Image Parameters === //
+    int32 width = GetConfigValue("Width", 1024);
+    int32 height = GetConfigValue("Height", 1024);
 
-    // Falloff values - change the colour of the fractal. Lower is brighter
-    double rFalloff = GetConfigValue("RFalloff", 15.0);
-    double gFalloff = GetConfigValue("GFalloff", 100.0);
-    double bFalloff = GetConfigValue("BFalloff", 500.0);
+    // Falloff values - Strength is the falloff, the others are the colour tint
+    float64 falloffStrength = GetConfigValue("RFalloff", 15.0);
+    float64 falloffR = GetConfigValue("FalloffR", 0.03);
+    float64 falloffG = GetConfigValue("FalloffG", 0.2);
+    float64 falloffB = GetConfigValue("FalloffB", 1.0);
 
-    // Value to assign non-escaping points - 0 is darkest, 1000 is brightest
-    int nonEscapingValue = GetConfigValue("NonEscapingValue", 0);
+    filesystem::path outputPath = filesystem::path(GetConfigValue("OutputPath", filesystem::current_path().string()));
+
+    // === Transformation Parameters === //
+    bool adjustForAspectRatio = GetConfigValue("AdjustForAspectRatio", true);
+    float64 offsetX = GetConfigValue("OffsetX", 0.0);
+    float64 offsetY = GetConfigValue("OffsetY", 0.0);
+    float64 scaleX = GetConfigValue("ScaleX", 1.0);
+    float64 scaleY = GetConfigValue("ScaleY", 1.0);
+
+    // === Calculation Parameters === //
+    // Value to assign non-escaping points - 0 is darkest, 1 is brightest
+    float64 nonEscapingValue = GetConfigValue("NonEscapingValue", 0.0);
 
     // Max iteration depth
-    int maxIterations = GetConfigValue("MaxIterations", 1000);
+    int32 maxIterations = GetConfigValue("MaxIterations", 1000);
 
     // Escape radius
-    double radius = GetConfigValue("Radius", 4.0);
+    float64 radius = GetConfigValue("Radius", 4.0);
 
-    // Border values
-    double minX = GetConfigValue("MinX", -2.0);
-    double maxX = GetConfigValue("MaxX", 2.0);
-    double minY = GetConfigValue("MinY", -2.0);
-    double maxY = GetConfigValue("MaxY", 2.0);
-
-    // Output path
-    filesystem::path outputPath = filesystem::path(GetConfigValue("OutputPath", filesystem::current_path().string()));
+#pragma endregion
 
     // Compute the julia fractal for each pixel in image
     cout << "Computing...\n";
-    //double aspectRatio = (double)width / (double)height;
-    vector<unsigned char> image(width * height * 4);
+
+    vector<uint8> image(width * height * 4);
     for (int i = 0; i < width; i++)
     {
         for (int j = 0; j < height; j++)
         {
-            // Compute for current pixel
-            double x = ((double)i / (double)width)  * (maxX-minX) + minX;
-            double y = ((double)j / (double)height) * (maxY-minY) + minY;
-            double result;
+            // Calculate pixel coordinates (normally -2 to 2 with a square output)
+            float64 x = ((float64)i / (float64)width)  * 4 + -2;
+            float64 y = ((float64)j / (float64)height) * 4 + -2;
 
-            if (fractalType == 1) result = MultiJulia(x, y, exponent, radius, maxIterations);
-            else result = Julia(x, y, real, imaginary, radius, maxIterations);
+            x /= scaleX;
+            y /= scaleY;
+            x -= offsetX;
+            y -= offsetY;
+
+            if (adjustForAspectRatio)
+                x *= (float64)width / (float64)height;
+
+            // Compute for current pixel
+            float64 result;
+            switch (fractalType)
+            {
+                case FractalType::Julia:
+                    result = Julia(x, y, real, imaginary, radius, maxIterations);
+                    break;
+                case FractalType::MultiJulia:
+                    result = MultiJulia(x, y, multiJuliaExponent, radius, maxIterations);
+                    break;
+            }
 
             // If non-escaping, set result to defined value
             if (result == -1)
-                result = nonEscapingValue;
+                result = nonEscapingValue * (float64)maxIterations;
 
             // Write to image vector RGBA format
-            image[4 * width * j + 4 * i + 0] = (unsigned char)((result / (result + rFalloff)) * 255);
-            image[4 * width * j + 4 * i + 1] = (unsigned char)((result / (result + gFalloff)) * 255);
-            image[4 * width * j + 4 * i + 2] = (unsigned char)((result / (result + bFalloff)) * 255);
-            image[4 * width * j + 4 * i + 3] = 255;
+            float64 pixelValue = result / (result + falloffStrength) * 255;
+            int32 pixelLocation = 4 * width * j + 4 * i;
+            image[pixelLocation]     = (uint8)(pixelValue * falloffR);
+            image[pixelLocation + 1] = (uint8)(pixelValue * falloffG);
+            image[pixelLocation + 2] = (uint8)(pixelValue * falloffB);
+            image[pixelLocation + 3] = 255;
         }
-        cout << "\r             \r" << ((double)(int)(((double)i/(double)width)*10000))/100 << "%"; // Print percentage complete
+
+        // Print percentage complete
+        // TODO: fix percentage
+        cout << "\r             \r" << ((double)(int)(((double)i/(double)width)*10000))/100 << "%";
     }
 
     // Encode and save
-    string path = outputPath.append("Julia_" + to_string(time(0)) + ".png").string();
-    vector<unsigned char> output;
+    string path = outputPath.append("julia_" + to_string(time(0)) + ".png").string();
+    vector<uint8> output;
     lodepng::encode(output, image, width, height);
+
     if (lodepng::save_file(output, outputPath.string()) == 0)
         cout << "\r             \rSaved to file '" << outputPath.string() << "'\n";
     else

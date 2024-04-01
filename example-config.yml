@@ -1,3 +1,32 @@
+### Fractal Parameters ###
+Real: -0.757
+Imaginary: 0.068
+FractalType: 1
+MultiJuliaExponent: 4
+
+### Image Parameters ###
+Width: 1024
+Height: 1024
+
+RFalloff: 15
+GFalloff: 100
+BFalloff: 500
+
+OutputPath: ""
+
+### Transformation Parameters ###
+AdjustForAspectRatio: true
+OffsetX: 0
+OffsetY: 0
+ScaleX: 1
+ScaleY: 1
+
+### Calculation Parameters ###
+NonEscapingValue: 0
+MaxIterations: 50
+Radius: 4
+
+
 # Fractal type
 # 0 - Julia - generates julia set using Real and Imaginary values
 # 1 - Multijulia - generates multijulia / multibrot set using MultiExponent value
@@ -8,7 +37,7 @@ Real: -0.757 # Defaults to -1
 Imaginary: 0.068 # Defaults to -1
 
 # Exponent of multijulia set (Multijulia set only)
-Exponent: 2 # Defaults to 2
+MultiJuliaExponent: 2 # Defaults to 2
 
 # Size (pixels)
 Width: 1024 # Defaults to 1024
@@ -21,8 +50,7 @@ GFalloff: 100 # Defaults to 100
 BFalloff: 500 # Defaults to 500
 
 # Brightness assigned to points that don't escape to infinity
-# Higher is lighter
-# Set to MaxIterations (normally 1000) to prevent fireflies
+# Higher is lighter, lower is darker, can be used to prevent fireflies
 # Defaults to 0
 NonEscapingValue: 1000
 
