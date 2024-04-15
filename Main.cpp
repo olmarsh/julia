@@ -193,7 +193,7 @@ int32 main() {
     }
 
     // Encode and save
-    string path = outputPath.append("julia_" + to_string(time(0)) + ".png").string();
+    string path = outputPath.append("julia_" + to_string(time(nullptr)) + ".png").string();
     vector<uint8> output;
     lodepng::encode(output, image, width, height);
 
