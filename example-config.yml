@@ -1,75 +1,70 @@
+# All of these parameters are optional, comment them out or remove them to let the default values get used
+
 ### Fractal Parameters ###
-Real: -0.757
-Imaginary: 0.068
-FractalType: 1
-MultiJuliaExponent: 4
+# Fractal type
+# Julia - generates julia set using Real and Imaginary values
+# MultiJulia - generates multi julia / mandelbrot set using MultiJuliaExponent value
+# Defaults to Julia
+FractalType: Julia
+
+# Coordinates of the fractal (julia set only)
+# Both default to 0
+Real: 0
+Imaginary: 0
+
+# Exponent of multi julia set (multi julia set only)
+# Defaults to 2
+MultiJuliaExponent: 2
 
 ### Image Parameters ###
+# Image size (pixels)
+# Both default to 1024
 Width: 1024
 Height: 1024
 
-RFalloff: 15
-GFalloff: 100
-BFalloff: 500
+# The strength of the colour falloff, used in the equation: colourStrength = fractalValue / (fractalValue + strength)
+# Also written as: y = x / (x + s)
+# Higher is less colour but more detailed, lower is more colour but less detailed and more blown out
+# Defaults to 15
+FalloffStrength: 15
 
-OutputPath: ""
+# The RGB colour values of the falloff, ranging between 0 and 1
+# All default to 1
+FalloffR: 1
+FalloffG: 1
+FalloffB: 1
+
+# Output path of the fractal image
+# Defaults to the CWD
+# OutputPath: ../../ #  As an example, this would put the output files 2 directories up
 
 ### Transformation Parameters ###
+# Whether a non-square image will adjust the fractal to avoid skewing
+# Defaults to true
 AdjustForAspectRatio: true
+
+# Offset of the fractal from the centre of the image
+# Increasing X moves the fractal to the right
+# Increasing Y moves the fractal down
+# Both default to 0
 OffsetX: 0
 OffsetY: 0
+
+# Controls the scale of the fractal on both the X and Y axes
+# Both default to 1
 ScaleX: 1
 ScaleY: 1
 
 ### Calculation Parameters ###
-NonEscapingValue: 0
-MaxIterations: 50
-Radius: 4
-
-
-# Fractal type
-# 0 - Julia - generates julia set using Real and Imaginary values
-# 1 - Multijulia - generates multijulia / multibrot set using MultiExponent value
-FractalType: 1
-
-# Coordinates of the fractal (Julia set only)
-Real: -0.757 # Defaults to -1
-Imaginary: 0.068 # Defaults to -1
-
-# Exponent of multijulia set (Multijulia set only)
-MultiJuliaExponent: 2 # Defaults to 2
-
-# Size (pixels)
-Width: 1024 # Defaults to 1024
-Height: 1024 # Defaults to 1024
-
-# Colour - Lower is lighter
-# The value is used in the equation x / (x + falloff)
-RFalloff: 15 # Defaults to 15
-GFalloff: 100 # Defaults to 100
-BFalloff: 500 # Defaults to 500
-
 # Brightness assigned to points that don't escape to infinity
-# Higher is lighter, lower is darker, can be used to prevent fireflies
+# Higher is lighter (max 1), lower is darker (min 0), and can be used to prevent fireflies
 # Defaults to 0
-NonEscapingValue: 1000
+NonEscapingValue: 0
 
-# The number of times the Julia equation is run to determine if a point will escape
+# The number of times the fractal equation is run to determine if a point will escape
 # Defaults to 1000
 MaxIterations: 1000
 
 # Escape radius - The distance from its start at which a point is considered "escaped"
 # Defaults to 4
 Radius: 4
-
-# Border values - The values at the edges of the screen (used to change zoom, aspect ratio)
-# Max values must be greater than min values
-# Defaults to -2, 2 for both x and y
-MinX: -2
-MaxX: 2
-MinY: -2
-MaxY: 2
-
-# Output Path
-# Defaults to the CWD
-# OutputPath: ../../ # This will put the output files 2 directories up

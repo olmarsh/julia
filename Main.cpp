@@ -82,11 +82,19 @@ T GetConfigValue(const string& key, T defaultValue)
     return Config[key] ? Config[key].as<T>() : defaultValue;
 }
 
+void Log(string message, bool error = false)
+{
+    if (error)
+        cout << "Error: ";
+
+    cout << message << endl;
+}
+
 int32 main() {
     // Get input from the config
     if (!filesystem::exists("config.yml"))
     {
-        cout << "Fatal Error: 'config.yml' does not exit";
+        Log("'config.yml' does not exist", true);
         return -1;
     }
 
@@ -95,11 +103,7 @@ int32 main() {
 #pragma region Parameters
 
     // === Fractal Parameters === //
-    float64 real = GetConfigValue("Real", 0.0);
-    float64 imaginary = GetConfigValue("Imaginary", 0.0);
     string fractalTypeString = GetConfigValue("FractalType", (string)"Julia");
-    float64 multiJuliaExponent = GetConfigValue("MultiJuliaExponent", 2.0);
-
     FractalType fractalType;
     if (fractalTypeString == "Julia")
         fractalType = FractalType::Julia;
@@ -107,19 +111,24 @@ int32 main() {
         fractalType = FractalType::MultiJulia;
     else
     {
-        cout << format("Fatal Error: FractalType '{}' is invalid", fractalTypeString);
-        return -1;
+        Log(format("Fatal Error: FractalType '{}' is invalid", fractalTypeString), true);
+        return -2;
     }
+
+    float64 real = GetConfigValue("Real", 0.0);
+    float64 imaginary = GetConfigValue("Imaginary", 0.0);
+
+    float64 multiJuliaExponent = GetConfigValue("MultiJuliaExponent", 2.0);
 
     // === Image Parameters === //
     int32 width = GetConfigValue("Width", 1024);
     int32 height = GetConfigValue("Height", 1024);
 
     // Falloff values - Strength is the falloff, the others are the colour tint
-    float64 falloffStrength = GetConfigValue("RFalloff", 15.0);
-    float64 falloffR = GetConfigValue("FalloffR", 0.03);
-    float64 falloffG = GetConfigValue("FalloffG", 0.2);
-    float64 falloffB = GetConfigValue("FalloffB", 1.0);
+    float64 falloffStrength = GetConfigValue("FalloffStrength", 15.0);
+    float64 falloffR = GetConfigValue("FalloffR", 1);
+    float64 falloffG = GetConfigValue("FalloffG", 1);
+    float64 falloffB = GetConfigValue("FalloffB", 1);
 
     filesystem::path outputPath = filesystem::path(GetConfigValue("OutputPath", filesystem::current_path().string()));
 
@@ -143,12 +152,11 @@ int32 main() {
 #pragma endregion
 
     // Compute the julia fractal for each pixel in image
-    cout << "Computing...\n";
-
+    Log("Computing...");
     vector<uint8> image(width * height * 4);
-    for (int i = 0; i < width; i++)
+    for (int32 i = 0; i < width; i++)
     {
-        for (int j = 0; j < height; j++)
+        for (int32 j = 0; j < height; j++)
         {
             // Calculate pixel coordinates (normally -2 to 2 with a square output)
             float64 x = ((float64)i / (float64)width)  * 4 + -2;
@@ -189,16 +197,23 @@ int32 main() {
 
         // Print percentage complete
         // TODO: fix percentage
-        cout << "\r             \r" << ((double)(int)(((double)i/(double)width)*10000))/100 << "%";
+        cout << "\r             \r" << ((double)(int)(((double)i/(double)width)*10000))/100 << "%" << flush;
     }
 
+    cout << "\r             \r";
+
     // Encode and save
-    string path = outputPath.append("julia_" + to_string(time(nullptr)) + ".png").string();
+    string path = outputPath.append(format("julia_{}.png", to_string(time(nullptr)))).string();
     vector<uint8> output;
     lodepng::encode(output, image, width, height);
 
     if (lodepng::save_file(output, outputPath.string()) == 0)
-        cout << "\r             \rSaved to file '" << outputPath.string() << "'\n";
+        Log(format("Saved to file '{}'", outputPath.string()));
     else
-        cout << "\r             \rFailed to save to file '" << outputPath.string() << "'\n";
+    {
+        Log(format("Failed to save to file '{}'", outputPath.string()), true);
+        return -3;
+    }
+
+    return 0;
 }
