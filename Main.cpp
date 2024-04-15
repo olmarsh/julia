@@ -129,6 +129,11 @@ int32 main() {
     float64 falloffG = GetConfigValue("FalloffG", 1.0);
     float64 falloffB = GetConfigValue("FalloffB", 1.0);
 
+    float64 backgroundR = GetConfigValue("BackgroundR", 0.0);
+    float64 backgroundG = GetConfigValue("BackgroundG", 0.0);
+    float64 backgroundB = GetConfigValue("BackgroundB", 0.0);
+    float64 backgroundA = GetConfigValue("BackgroundA", 1.0);
+
     filesystem::path outputPath = filesystem::path(GetConfigValue("OutputPath", filesystem::current_path().string()));
 
     // === Transformation Parameters === //
@@ -181,12 +186,12 @@ int32 main() {
                 result = nonEscapingValue * (float64)maxIterations;
 
             // Write to image vector RGBA format
-            float64 pixelValue = result / (result + falloffStrength) * 255;
+            float64 pixelValue = result / (result + falloffStrength);
             int32 pixelLocation = 4 * width * j + 4 * i;
-            image[pixelLocation]     = (uint8)(pixelValue * falloffR);
-            image[pixelLocation + 1] = (uint8)(pixelValue * falloffG);
-            image[pixelLocation + 2] = (uint8)(pixelValue * falloffB);
-            image[pixelLocation + 3] = 255;
+            image[pixelLocation]     = (uint8)(lerp(backgroundR, falloffR, pixelValue) * 255);
+            image[pixelLocation + 1] = (uint8)(lerp(backgroundG, falloffG, pixelValue) * 255);
+            image[pixelLocation + 2] = (uint8)(lerp(backgroundB, falloffB, pixelValue) * 255);
+            image[pixelLocation + 3] = (uint8)(lerp(backgroundA, 1,        pixelValue) * 255);
         }
 
         // Print percentage complete

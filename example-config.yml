@@ -34,6 +34,14 @@ FalloffR: 1
 FalloffG: 1
 FalloffB: 1
 
+# The RGB colour values of the background, ranging between 0 and 1
+# The background can also be transparent
+# All default to 0 except for alpha, which defaults to 1
+BackgroundR: 0
+BackgroundG: 0
+BackgroundB: 0
+BackgroundA: 1
+
 # Output path of the fractal image
 # Defaults to the CWD
 # OutputPath: ../../ #  As an example, this would put the output files 2 directories up
