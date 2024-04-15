@@ -126,9 +126,9 @@ int32 main() {
 
     // Falloff values - Strength is the falloff, the others are the colour tint
     float64 falloffStrength = GetConfigValue("FalloffStrength", 15.0);
-    float64 falloffR = GetConfigValue("FalloffR", 1);
-    float64 falloffG = GetConfigValue("FalloffG", 1);
-    float64 falloffB = GetConfigValue("FalloffB", 1);
+    float64 falloffR = GetConfigValue("FalloffR", 1.0);
+    float64 falloffG = GetConfigValue("FalloffG", 1.0);
+    float64 falloffB = GetConfigValue("FalloffB", 1.0);
 
     filesystem::path outputPath = filesystem::path(GetConfigValue("OutputPath", filesystem::current_path().string()));
 

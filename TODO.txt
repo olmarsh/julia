@@ -1,2 +1,2 @@
-- Improve example config clarity
+- Add background colour option
 - Allow making animations
