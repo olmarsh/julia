@@ -162,10 +162,10 @@ int32 main() {
             float64 x = ((float64)i / (float64)width)  * 4 + -2;
             float64 y = ((float64)j / (float64)height) * 4 + -2;
 
-            x /= scaleX;
-            y /= scaleY;
             x -= offsetX;
             y -= offsetY;
+            x /= scaleX;
+            y /= scaleY;
 
             if (adjustForAspectRatio)
                 x *= (float64)width / (float64)height;
