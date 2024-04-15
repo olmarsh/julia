@@ -1,3 +1,5 @@
 - Add background colour option
+  - Add to example config
 - Add option to change alpha channel
+  - Add to example config
 - Allow making animations

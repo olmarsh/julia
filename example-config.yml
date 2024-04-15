@@ -67,6 +67,6 @@ NonEscapingValue: 0
 # Defaults to 1000
 MaxIterations: 1000
 
-# Escape radius - The distance from its start at which a point is considered "escaped"
+# The distance from a pixels starting position at which it is considered "escaped"
 # Defaults to 4
-Radius: 4
+EscapeRadius: 4

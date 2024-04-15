@@ -124,7 +124,6 @@ int32 main() {
     int32 width = GetConfigValue("Width", 1024);
     int32 height = GetConfigValue("Height", 1024);
 
-    // Falloff values - Strength is the falloff, the others are the colour tint
     float64 falloffStrength = GetConfigValue("FalloffStrength", 15.0);
     float64 falloffR = GetConfigValue("FalloffR", 1.0);
     float64 falloffG = GetConfigValue("FalloffG", 1.0);
@@ -140,14 +139,9 @@ int32 main() {
     float64 scaleY = GetConfigValue("ScaleY", 1.0);
 
     // === Calculation Parameters === //
-    // Value to assign non-escaping points - 0 is darkest, 1 is brightest
     float64 nonEscapingValue = GetConfigValue("NonEscapingValue", 0.0);
-
-    // Max iteration depth
     int32 maxIterations = GetConfigValue("MaxIterations", 1000);
-
-    // Escape radius
-    float64 radius = GetConfigValue("Radius", 4.0);
+    float64 radius = GetConfigValue("EscapeRadius", 4.0);
 
 #pragma endregion
 
