@@ -24,8 +24,7 @@ YAML::Node Config;
 
 enum class FractalType
 {
-    Julia,
-    MultiJulia,
+    Julia, MultiJulia,
 };
 
 float64 Julia(float64 x, float64 y, float64 cx, float64 cy, float64 radius, int32 iterationDepth)
@@ -35,7 +34,7 @@ float64 Julia(float64 x, float64 y, float64 cx, float64 cy, float64 radius, int3
     while (x * x + y * y < radius)
     {
         float64 tempX = x * x - y * y;
-        y = 2 * x * y  + cy;
+        y = 2 * x * y + cy;
         x = tempX + cx;
         iteration++;
 
@@ -90,7 +89,8 @@ void Log(string message, bool error = false)
     cout << message << endl;
 }
 
-int32 main() {
+int32 main()
+{
     // Get input from the config
     if (!filesystem::exists("config.yml"))
     {
@@ -158,7 +158,7 @@ int32 main() {
         for (int32 j = 0; j < height; j++)
         {
             // Calculate pixel coordinates (normally -2 to 2 with a square output)
-            float64 x = ((float64)i / (float64)width)  * 4 + -2;
+            float64 x = ((float64)i / (float64)width) * 4 + -2;
             float64 y = ((float64)j / (float64)height) * 4 + -2;
 
             x -= offsetX;
@@ -188,15 +188,15 @@ int32 main() {
             // Write to image vector RGBA format
             float64 pixelValue = result / (result + falloffStrength);
             int32 pixelLocation = 4 * width * j + 4 * i;
-            image[pixelLocation]     = (uint8)(lerp(backgroundR, falloffR, pixelValue) * 255);
+            image[pixelLocation] = (uint8)(lerp(backgroundR, falloffR, pixelValue) * 255);
             image[pixelLocation + 1] = (uint8)(lerp(backgroundG, falloffG, pixelValue) * 255);
             image[pixelLocation + 2] = (uint8)(lerp(backgroundB, falloffB, pixelValue) * 255);
-            image[pixelLocation + 3] = (uint8)(lerp(backgroundA, 1,        pixelValue) * 255);
+            image[pixelLocation + 3] = (uint8)(lerp(backgroundA, 1, pixelValue) * 255);
         }
 
         // Print percentage complete
         // TODO: fix percentage
-        cout << "\r             \r" << ((double)(int)(((double)i/(double)width)*10000))/100 << "%" << flush;
+        cout << "\r             \r" << ((double)(int)(((double)i / (double)width) * 10000)) / 100 << "%" << flush;
     }
 
     cout << "\r             \r";
