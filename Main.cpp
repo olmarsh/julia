@@ -180,7 +180,7 @@ int32 main()
             imaginary = Interpolate(imaginaryStart, imaginaryEnd, (float64)frame/(frameCount-1), interpolationType);
         }
         // Compute the julia fractal for each pixel in frame
-        Log(format("Computing frame {} of {} ({}.png)...", frame+1, frameCount, frame));
+        Log(format("Computing frame {} of {} ({}.png)...", frame+1, frameCount, frame+1));
         Log(format("Real: {:.5f}, Imaginary: {:.5f}", real, imaginary));
         vector<uint8> image(width * height * 4);
         for (int32 i = 0; i < width; i++)
@@ -234,7 +234,7 @@ int32 main()
         // Encode and save
         filesystem::path path = outputPath;
         if (animate == false) path.append(format("julia_{}.png", to_string(time(nullptr)))).string();
-        else path.append(format("{}.png", frame));
+        else path.append(format("{}.png", frame+1));
         vector<uint8> output;
         lodepng::encode(output, image, width, height);
 
