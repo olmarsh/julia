@@ -90,6 +90,11 @@ void Log(string message, bool error = false)
     cout << message << endl;
 }
 
+float64 Interpolate(float64 start, float64 end,float64 pos, string method = "linear") {
+    if (method == "linear") return start + ((end - start) * pos);
+    else return 0;
+}
+
 int32 main()
 {
     // Get input from the config
@@ -149,71 +154,96 @@ int32 main()
     int32 maxIterations = GetConfigValue("MaxIterations", 1000);
     float64 radius = GetConfigValue("EscapeRadius", 4.0);
 
+    // === Animation Parameters === //
+    bool animate = GetConfigValue("Animate", false);
+    int32 frameCount = GetConfigValue("FrameCount", 30);
+
+    string interpolationType = GetConfigValue("InterpolationType", (string)"linear");
+
+    bool animateCoordinates = GetConfigValue("AnimateCoordinates", false);
+    float64 realStart = GetConfigValue("RealStart", 1.0);
+    float64 realEnd = GetConfigValue("RealEnd", 1.0);
+    float64 imaginaryStart = GetConfigValue("ImaginaryStart", 1.0);
+    float64 imaginaryEnd = GetConfigValue("ImaginaryEnd", 1.0);
+
 #pragma endregion
 
-    // Compute the julia fractal for each pixel in image
-    Log("Computing...");
-    vector<uint8> image(width * height * 4);
-    for (int32 i = 0; i < width; i++)
+    if (animate == false) frameCount = 1;
+    string timeString = to_string(std::time(nullptr));  // time string for the output folder name if animation is used
+    if (animate) filesystem::create_directory(outputPath.append(format("julia_{}", timeString)));
+    for (int frame=0;frame<frameCount;frame++)
     {
-        for (int32 j = 0; j < height; j++)
+        if (animate && animateCoordinates)
         {
-            // Calculate pixel coordinates (normally -2 to 2 with a square output)
-            float64 x = ((float64)i / (float64)width) * 4 + -2;
-            float64 y = ((float64)j / (float64)height) * 4 + -2;
-
-            x -= offsetX;
-            y -= offsetY;
-            x /= scaleX;
-            y /= scaleY;
-
-            if (adjustForAspectRatio)
-                x *= (float64)width / (float64)height;
-
-            // Compute for current pixel
-            float64 result;
-            switch (fractalType)
+            real = Interpolate(realStart, realEnd, (float64)frame/(frameCount-1), interpolationType);
+            imaginary = Interpolate(imaginaryStart, imaginaryEnd, (float64)frame/(frameCount-1), interpolationType);
+        }
+        cout << format("Real: {:.5f}, Imaginary: {:.5f}\n", real, imaginary);
+        // Compute the julia fractal for each pixel in frame
+        Log(format("Computing frame {} of {} ({}.png)...", frame+1, frameCount, frame));
+        vector<uint8> image(width * height * 4);
+        for (int32 i = 0; i < width; i++)
+        {
+            for (int32 j = 0; j < height; j++)
             {
-                case FractalType::Julia:
-                    result = Julia(x, y, real, imaginary, radius, maxIterations);
-                    break;
-                case FractalType::MultiJulia:
-                    result = MultiJulia(x, y, multiJuliaExponent, radius, maxIterations);
-                    break;
+                // Calculate pixel coordinates (normally -2 to 2 with a square output)
+                float64 x = ((float64)i / (float64)width) * 4 + -2;
+                float64 y = ((float64)j / (float64)height) * 4 + -2;
+
+                x -= offsetX;
+                y -= offsetY;
+                x /= scaleX;
+                y /= scaleY;
+
+                if (adjustForAspectRatio)
+                    x *= (float64)width / (float64)height;
+
+                // Compute for current pixel
+                float64 result;
+                switch (fractalType)
+                {
+                    case FractalType::Julia:
+                        result = Julia(x, y, real, imaginary, radius, maxIterations);
+                        break;
+                    case FractalType::MultiJulia:
+                        result = MultiJulia(x, y, multiJuliaExponent, radius, maxIterations);
+                        break;
+                }
+
+                // If non-escaping, set result to defined value
+                if (result == -1)
+                    result = nonEscapingValue * (float64)maxIterations;
+
+                // Write to image vector RGBA format
+                float64 pixelValue = result / (result + falloffStrength);
+                int32 pixelLocation = 4 * width * j + 4 * i;
+                image[pixelLocation] = (uint8)(lerp(backgroundR, falloffR, pixelValue) * 255);
+                image[pixelLocation + 1] = (uint8)(lerp(backgroundG, falloffG, pixelValue) * 255);
+                image[pixelLocation + 2] = (uint8)(lerp(backgroundB, falloffB, pixelValue) * 255);
+                image[pixelLocation + 3] = (uint8)(lerp(backgroundA, 1, pixelValue) * 255);
             }
 
-            // If non-escaping, set result to defined value
-            if (result == -1)
-                result = nonEscapingValue * (float64)maxIterations;
-
-            // Write to image vector RGBA format
-            float64 pixelValue = result / (result + falloffStrength);
-            int32 pixelLocation = 4 * width * j + 4 * i;
-            image[pixelLocation] = (uint8)(lerp(backgroundR, falloffR, pixelValue) * 255);
-            image[pixelLocation + 1] = (uint8)(lerp(backgroundG, falloffG, pixelValue) * 255);
-            image[pixelLocation + 2] = (uint8)(lerp(backgroundB, falloffB, pixelValue) * 255);
-            image[pixelLocation + 3] = (uint8)(lerp(backgroundA, 1, pixelValue) * 255);
+            // Print percentage complete
+            // TODO: fix percentage
+            cout << "\r             \r" << ((double)(int)(((double)i / (double)width) * 10000)) / 100 << "%" << flush;
         }
 
-        // Print percentage complete
-        // TODO: fix percentage
-        cout << "\r             \r" << ((double)(int)(((double)i / (double)width) * 10000)) / 100 << "%" << flush;
+        cout << "\r             \r";
+
+        // Encode and save
+        filesystem::path path = outputPath;
+        if (animate == false) path.append(format("julia_{}.png", to_string(time(nullptr)))).string();
+        else path.append(format("{}.png", frame));
+        vector<uint8> output;
+        lodepng::encode(output, image, width, height);
+
+        if (lodepng::save_file(output, path.string()) == 0)
+            Log(format("Saved to file '{}'\n", path.string()));
+        else
+        {
+            Log(format("Failed to save to file '{}'", path.string()), true);
+            return -3;
+        }
     }
-
-    cout << "\r             \r";
-
-    // Encode and save
-    string path = outputPath.append(format("julia_{}.png", to_string(time(nullptr)))).string();
-    vector<uint8> output;
-    lodepng::encode(output, image, width, height);
-
-    if (lodepng::save_file(output, outputPath.string()) == 0)
-        Log(format("Saved to file '{}'", outputPath.string()));
-    else
-    {
-        Log(format("Failed to save to file '{}'", outputPath.string()), true);
-        return -3;
-    }
-
     return 0;
 }

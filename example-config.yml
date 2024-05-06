@@ -78,3 +78,22 @@ MaxIterations: 1000
 # The distance from a pixels starting position at which it is considered "escaped"
 # Defaults to 4
 EscapeRadius: 4
+
+### Animation Parameters ###
+# If Animate is set to true the program will generate many images in sequence and save them to a new folder
+# smoothing between the two specified values for the specified number of frames.
+# Defaults to false, framecount defaults to 1
+Animate: false
+FrameCount: 1
+
+# Interpolation type
+# Currently only linear is implemented
+# Defaults to linear
+InterpolationType: "linear"
+
+# Animate coordinates interpolated between provided values.
+AnimateCoordinates: true
+RealStart: 0.2
+RealEnd: 0.75
+ImaginaryStart: 0.8
+ImaginaryEnd: 0.05
