@@ -92,6 +92,7 @@ void Log(string message, bool error = false)
 
 float64 Interpolate(float64 start, float64 end,float64 pos, string method = "linear") {
     if (method == "linear") return start + ((end - start) * pos);
+    else if (method == "cosine") return start + ((end - start) * (1 - cos(pos * M_PI)) * 0.5);
     else return 0;
 }
 
@@ -158,7 +159,7 @@ int32 main()
     bool animate = GetConfigValue("Animate", false);
     int32 frameCount = GetConfigValue("FrameCount", 30);
 
-    string interpolationType = GetConfigValue("InterpolationType", (string)"linear");
+    string interpolationType = GetConfigValue("InterpolationType", (string)"cosine");
 
     bool animateCoordinates = GetConfigValue("AnimateCoordinates", false);
     float64 realStart = GetConfigValue("RealStart", 1.0);
@@ -178,9 +179,9 @@ int32 main()
             real = Interpolate(realStart, realEnd, (float64)frame/(frameCount-1), interpolationType);
             imaginary = Interpolate(imaginaryStart, imaginaryEnd, (float64)frame/(frameCount-1), interpolationType);
         }
-        cout << format("Real: {:.5f}, Imaginary: {:.5f}\n", real, imaginary);
         // Compute the julia fractal for each pixel in frame
         Log(format("Computing frame {} of {} ({}.png)...", frame+1, frameCount, frame));
+        Log(format("Real: {:.5f}, Imaginary: {:.5f}", real, imaginary));
         vector<uint8> image(width * height * 4);
         for (int32 i = 0; i < width; i++)
         {

@@ -87,13 +87,13 @@ Animate: false
 FrameCount: 1
 
 # Interpolation type
-# Currently only linear is implemented
-# Defaults to linear
-InterpolationType: "linear"
+# Currently only linear and cosine are implemented
+# Defaults to cosine
+InterpolationType: cosine
 
 # Animate coordinates interpolated between provided values.
-AnimateCoordinates: true
+AnimateCoordinates: false
 RealStart: 0.2
-RealEnd: 0.75
+RealEnd: -0.75
 ImaginaryStart: 0.8
 ImaginaryEnd: 0.05
