@@ -88,8 +88,9 @@ Animate: false
 FrameCount: 1
 
 # Interpolation type
-# Currently only linear and cosine are implemented
+# Currently only linear, cosine and exponential are implemented
 # Defaults to cosine
+# Exponential recommended for scale animations
 InterpolationType: cosine
 
 # Animate coordinates interpolated between provided values.

@@ -119,6 +119,7 @@ void Log(string message, bool error = false)
 float64 Interpolate(float64 start, float64 end,float64 pos, string method = "linear") {
     if (method == "linear") return start + ((end - start) * pos);
     else if (method == "cosine") return start + ((end - start) * (1 - cos(pos * M_PI)) * 0.5);
+    else if (method == "exponential") return start + ((end - start) * (pow(pos,2)));
     else return 0;
 }
 
