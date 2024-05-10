@@ -3,7 +3,8 @@
 ### Fractal Parameters ###
 # Fractal type
 # Julia - generates julia set using Real and Imaginary values
-# MultiJulia - generates multi julia / mandelbrot set using MultiJuliaExponent value
+# Mandelbrot - generates mandelbrot set (Exponent 2), using a more efficient algorith than Multibrot
+# Multibrot - generates multibrot set using any MultibrotExponent value, but slower than Mandelbrot
 # Defaults to Julia
 FractalType: Julia
 
@@ -12,9 +13,9 @@ FractalType: Julia
 Real: 0
 Imaginary: 0
 
-# Exponent of multi julia set (multi julia set only)
+# Exponent of Multibrot set (Multibrot set only)
 # Defaults to 2
-MultiJuliaExponent: 2
+MultibrotExponent: 2
 
 ### Image Parameters ###
 # Image size (pixels)
@@ -66,12 +67,12 @@ ScaleY: 1
 ### Calculation Parameters ###
 # Brightness assigned to points that don't escape to infinity
 # Higher is lighter (max 1), lower is darker (min 0), and can be used to prevent fireflies
-# Recommended to set to 1 for julia fractal, and 0 for multi julia
+# Recommended to set to 1 for julia fractal, and 0 for Multibrot
 # Defaults to 0
 NonEscapingValue: 0
 
 # The number of times the fractal equation is run to determine if a point will escape
-# Recommended to lower if you have a low-end computer or are generating a multi julia, as it is very computationally expensive
+# Recommended to lower if you have a low-end computer or are generating a Multibrot, as it is very computationally expensive
 # Defaults to 1000
 MaxIterations: 1000
 
@@ -97,3 +98,10 @@ RealStart: 0.2
 RealEnd: -0.75
 ImaginaryStart: 0.8
 ImaginaryEnd: 0.05
+
+# Animate the scale of the fractal
+AnimateScale: false
+ScaleStartX: 1
+ScaleStartY: 1
+ScaleEndX:   1
+ScaleEndY:   1

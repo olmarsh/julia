@@ -2,6 +2,7 @@
 #include <cmath>
 #include <filesystem>
 #include <format>
+#include <chrono>
 
 #include <lodepng.h>
 #include <yaml-cpp/yaml.h>
@@ -25,7 +26,7 @@ YAML::Node Config;
 
 enum class FractalType
 {
-    Julia, MultiJulia,
+    Julia, Multibrot, Mandelbrot
 };
 
 float64 Julia(float64 x, float64 y, float64 cx, float64 cy, float64 radius, int32 iterationDepth)
@@ -51,8 +52,9 @@ float64 Julia(float64 x, float64 y, float64 cx, float64 cy, float64 radius, int3
     return ret < 0 ? 0 : ret;
 }
 
-double MultiJulia(long double x, long double y, double n, double radius, int iterationDepth)
+double Multibrot(long double x, long double y, double n, double radius, int iterationDepth)
 {
+    //if (n == 2) return Mandelbrot(x, y, radius, iterationDepth);  // we can call the more efficient function if exponent is 2
     int iteration = 0;
     double cx = x;
     double cy = y;
@@ -70,6 +72,30 @@ double MultiJulia(long double x, long double y, double n, double radius, int ite
     }
 
     // Smoothing formula
+    double z = x * x + y * y;
+    double ret = iteration + 1 - log(log(z)) / log(2);
+
+    return ret < 0 ? 0 : ret;
+}
+
+double Mandelbrot(long double x, long double y, double radius, int iterationDepth)
+{
+    double cx = x;
+    double cy = y;
+    int iteration = 0;
+
+    while (x * x + y * y < radius)
+    {
+        double tempX = pow(x,2) - pow(y,2) + cx;
+        y = 2 * x * y + cy;
+        x = tempX;
+        iteration++;
+
+        // If the point never escaped
+        if (iteration >= iterationDepth)
+            return -1;
+    }
+
     double z = x * x + y * y;
     double ret = iteration + 1 - log(log(z)) / log(2);
 
@@ -114,8 +140,10 @@ int32 main()
     FractalType fractalType;
     if (fractalTypeString == "Julia")
         fractalType = FractalType::Julia;
-    else if (fractalTypeString == "MultiJulia")
-        fractalType = FractalType::MultiJulia;
+    else if (fractalTypeString == "Multibrot")
+        fractalType = FractalType::Multibrot;
+    else if (fractalTypeString == "Mandelbrot")
+        fractalType = FractalType::Mandelbrot;
     else
     {
         Log(format("Fatal Error: FractalType '{}' is invalid", fractalTypeString), true);
@@ -125,7 +153,7 @@ int32 main()
     float64 real = GetConfigValue("Real", 0.0);
     float64 imaginary = GetConfigValue("Imaginary", 0.0);
 
-    float64 multiJuliaExponent = GetConfigValue("MultiJuliaExponent", 2.0);
+    float64 MultibrotExponent = GetConfigValue("MultibrotExponent", 2.0);
 
     // === Image Parameters === //
     int32 width = GetConfigValue("Width", 1024);
@@ -167,6 +195,12 @@ int32 main()
     float64 imaginaryStart = GetConfigValue("ImaginaryStart", 1.0);
     float64 imaginaryEnd = GetConfigValue("ImaginaryEnd", 1.0);
 
+    bool animateScale = GetConfigValue("AnimateScale", false);
+    float64 scaleStartX = GetConfigValue("ScaleStartX", 1.0);
+    float64 scaleEndX = GetConfigValue("ScaleEndX", 1.0);
+    float64 scaleStartY = GetConfigValue("ScaleStartY", 1.0);
+    float64 scaleEndY = GetConfigValue("ScaleEndY", 1.0);
+
 #pragma endregion
 
     if (animate == false) frameCount = 1;
@@ -174,15 +208,25 @@ int32 main()
     if (animate) filesystem::create_directory(outputPath.append(format("julia_{}", timeString)));
     for (int frame=0;frame<frameCount;frame++)
     {
-        if (animate && animateCoordinates)
+        if (animate && animateCoordinates)  // Update coordinates to animated coordinates
         {
             real = Interpolate(realStart, realEnd, (float64)frame/(frameCount-1), interpolationType);
             imaginary = Interpolate(imaginaryStart, imaginaryEnd, (float64)frame/(frameCount-1), interpolationType);
         }
+        if (animate && animateScale)  // Update scale to animated scale
+        {
+            scaleX = Interpolate(scaleStartX, scaleEndX, (float64)frame/(frameCount-1), interpolationType);
+            scaleY = Interpolate(scaleStartY, scaleEndY, (float64)frame/(frameCount-1), interpolationType);
+        }
         // Compute the julia fractal for each pixel in frame
         Log(format("Computing frame {} of {} ({}.png)...", frame+1, frameCount, frame+1));
-        Log(format("Real: {:.5f}, Imaginary: {:.5f}", real, imaginary));
+        if (fractalType == FractalType::Julia)           Log(format("Real: {:.5f}, Imaginary: {:.5f}", real, imaginary));
+        else if (fractalType == FractalType::Multibrot)  Log(format("Multibrot exponent: {:.5f}", MultibrotExponent));
+        else if (fractalType == FractalType::Mandelbrot) Log(format("Mandelbrot"));
         vector<uint8> image(width * height * 4);
+
+        auto start = chrono::high_resolution_clock::now();  // start measuring the execution time
+        auto stop = chrono::high_resolution_clock::now();
         for (int32 i = 0; i < width; i++)
         {
             for (int32 j = 0; j < height; j++)
@@ -191,10 +235,11 @@ int32 main()
                 float64 x = ((float64)i / (float64)width) * 4 + -2;
                 float64 y = ((float64)j / (float64)height) * 4 + -2;
 
-                x -= offsetX;
-                y -= offsetY;
                 x /= scaleX;
                 y /= scaleY;
+
+                x += offsetX;
+                y += offsetY;
 
                 if (adjustForAspectRatio)
                     x *= (float64)width / (float64)height;
@@ -206,8 +251,11 @@ int32 main()
                     case FractalType::Julia:
                         result = Julia(x, y, real, imaginary, radius, maxIterations);
                         break;
-                    case FractalType::MultiJulia:
-                        result = MultiJulia(x, y, multiJuliaExponent, radius, maxIterations);
+                    case FractalType::Multibrot:
+                        result = Multibrot(x, y, MultibrotExponent, radius, maxIterations);
+                        break;
+                    case FractalType::Mandelbrot:
+                        result = Mandelbrot(x, y, radius, maxIterations);
                         break;
                 }
 
@@ -226,10 +274,14 @@ int32 main()
 
             // Print percentage complete
             // TODO: fix percentage
-            cout << "\r             \r" << ((double)(int)(((double)i / (double)width) * 10000)) / 100 << "%" << flush;
+            stop = chrono::high_resolution_clock::now();
+            cout << "\r                                 \r" <<  setw(5) << ((double)(int)(((double)i / (double)width) * 10000)) / 100 << "% | " << duration_cast<chrono::milliseconds>(stop - start) * (1/((double)i / (double)width)) - duration_cast<chrono::milliseconds>(stop - start) << " remaining" << flush;
         }
+        stop = chrono::high_resolution_clock::now();  // finish measuring the execution time
+        cout << "\r                                 \r";
 
-        cout << "\r             \r";
+        Log(format("Computed frame in {}", duration_cast<chrono::milliseconds>(stop - start)));
+        cout << "\r                                 \r";
 
         // Encode and save
         filesystem::path path = outputPath;
