@@ -25,7 +25,7 @@ YAML::Node Config;
 
 enum class FractalType
 {
-    Julia, MultiJulia,
+    Julia, Multibrot, Mandelbrot
 };
 
 float64 Julia(float64 x, float64 y, float64 cx, float64 cy, float64 radius, int32 iterationDepth)
@@ -51,8 +51,9 @@ float64 Julia(float64 x, float64 y, float64 cx, float64 cy, float64 radius, int3
     return ret < 0 ? 0 : ret;
 }
 
-double MultiJulia(long double x, long double y, double n, double radius, int iterationDepth)
+double Multibrot(long double x, long double y, double n, double radius, int iterationDepth)
 {
+    //if (n == 2) return Mandelbrot(x, y, radius, iterationDepth);  // we can call the more efficient function if exponent is 2
     int iteration = 0;
     double cx = x;
     double cy = y;
@@ -70,6 +71,30 @@ double MultiJulia(long double x, long double y, double n, double radius, int ite
     }
 
     // Smoothing formula
+    double z = x * x + y * y;
+    double ret = iteration + 1 - log(log(z)) / log(2);
+
+    return ret < 0 ? 0 : ret;
+}
+
+double Mandelbrot(long double x, long double y, double radius, int iterationDepth)
+{
+    double cx = x;
+    double cy = y;
+    int iteration = 0;
+
+    while (x * x + y * y < radius)
+    {
+        double tempX = pow(x,2) - pow(y,2) + cx;
+        y = 2 * x * y + cy;
+        x = tempX;
+        iteration++;
+
+        // If the point never escaped
+        if (iteration >= iterationDepth)
+            return -1;
+    }
+
     double z = x * x + y * y;
     double ret = iteration + 1 - log(log(z)) / log(2);
 
@@ -114,8 +139,10 @@ int32 main()
     FractalType fractalType;
     if (fractalTypeString == "Julia")
         fractalType = FractalType::Julia;
-    else if (fractalTypeString == "MultiJulia")
-        fractalType = FractalType::MultiJulia;
+    else if (fractalTypeString == "Multibrot")
+        fractalType = FractalType::Multibrot;
+    else if (fractalTypeString == "Mandelbrot")
+        fractalType = FractalType::Mandelbrot;
     else
     {
         Log(format("Fatal Error: FractalType '{}' is invalid", fractalTypeString), true);
@@ -125,7 +152,7 @@ int32 main()
     float64 real = GetConfigValue("Real", 0.0);
     float64 imaginary = GetConfigValue("Imaginary", 0.0);
 
-    float64 multiJuliaExponent = GetConfigValue("MultiJuliaExponent", 2.0);
+    float64 MultibrotExponent = GetConfigValue("MultibrotExponent", 2.0);
 
     // === Image Parameters === //
     int32 width = GetConfigValue("Width", 1024);
@@ -206,8 +233,11 @@ int32 main()
                     case FractalType::Julia:
                         result = Julia(x, y, real, imaginary, radius, maxIterations);
                         break;
-                    case FractalType::MultiJulia:
-                        result = MultiJulia(x, y, multiJuliaExponent, radius, maxIterations);
+                    case FractalType::Multibrot:
+                        result = Multibrot(x, y, MultibrotExponent, radius, maxIterations);
+                        break;
+                    case FractalType::Mandelbrot:
+                        result = Mandelbrot(x, y, radius, maxIterations);
                         break;
                 }
 
