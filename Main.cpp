@@ -2,6 +2,7 @@
 #include <cmath>
 #include <filesystem>
 #include <format>
+#include <chrono>
 
 #include <lodepng.h>
 #include <yaml-cpp/yaml.h>
@@ -223,6 +224,9 @@ int32 main()
         else if (fractalType == FractalType::Multibrot)  Log(format("Multibrot exponent: {:.5f}", MultibrotExponent));
         else if (fractalType == FractalType::Mandelbrot) Log(format("Mandelbrot"));
         vector<uint8> image(width * height * 4);
+
+        auto start = chrono::high_resolution_clock::now();  // start measuring the execution time
+        auto stop = chrono::high_resolution_clock::now();
         for (int32 i = 0; i < width; i++)
         {
             for (int32 j = 0; j < height; j++)
@@ -270,10 +274,14 @@ int32 main()
 
             // Print percentage complete
             // TODO: fix percentage
-            cout << "\r             \r" << ((double)(int)(((double)i / (double)width) * 10000)) / 100 << "%" << flush;
+            stop = chrono::high_resolution_clock::now();
+            cout << "\r                                 \r" <<  setw(5) << ((double)(int)(((double)i / (double)width) * 10000)) / 100 << "% | " << duration_cast<chrono::milliseconds>(stop - start) * (1/((double)i / (double)width)) - duration_cast<chrono::milliseconds>(stop - start) << " remaining" << flush;
         }
+        stop = chrono::high_resolution_clock::now();  // finish measuring the execution time
+        cout << "\r                                 \r";
 
-        cout << "\r             \r";
+        Log(format("Computed frame in {}", duration_cast<chrono::milliseconds>(stop - start)));
+        cout << "\r                                 \r";
 
         // Encode and save
         filesystem::path path = outputPath;
