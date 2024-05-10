@@ -98,3 +98,10 @@ RealStart: 0.2
 RealEnd: -0.75
 ImaginaryStart: 0.8
 ImaginaryEnd: 0.05
+
+# Animate the scale of the fractal
+AnimateScale: false
+ScaleStartX: 1
+ScaleStartY: 1
+ScaleEndX:   1
+ScaleEndY:   1

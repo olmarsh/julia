@@ -194,6 +194,12 @@ int32 main()
     float64 imaginaryStart = GetConfigValue("ImaginaryStart", 1.0);
     float64 imaginaryEnd = GetConfigValue("ImaginaryEnd", 1.0);
 
+    bool animateScale = GetConfigValue("AnimateScale", false);
+    float64 scaleStartX = GetConfigValue("ScaleStartX", 1.0);
+    float64 scaleEndX = GetConfigValue("ScaleEndX", 1.0);
+    float64 scaleStartY = GetConfigValue("ScaleStartY", 1.0);
+    float64 scaleEndY = GetConfigValue("ScaleEndY", 1.0);
+
 #pragma endregion
 
     if (animate == false) frameCount = 1;
@@ -201,14 +207,21 @@ int32 main()
     if (animate) filesystem::create_directory(outputPath.append(format("julia_{}", timeString)));
     for (int frame=0;frame<frameCount;frame++)
     {
-        if (animate && animateCoordinates)
+        if (animate && animateCoordinates)  // Update coordinates to animated coordinates
         {
             real = Interpolate(realStart, realEnd, (float64)frame/(frameCount-1), interpolationType);
             imaginary = Interpolate(imaginaryStart, imaginaryEnd, (float64)frame/(frameCount-1), interpolationType);
         }
+        if (animate && animateScale)  // Update scale to animated scale
+        {
+            scaleX = Interpolate(scaleStartX, scaleEndX, (float64)frame/(frameCount-1), interpolationType);
+            scaleY = Interpolate(scaleStartY, scaleEndY, (float64)frame/(frameCount-1), interpolationType);
+        }
         // Compute the julia fractal for each pixel in frame
         Log(format("Computing frame {} of {} ({}.png)...", frame+1, frameCount, frame));
-        Log(format("Real: {:.5f}, Imaginary: {:.5f}", real, imaginary));
+        if (fractalType == FractalType::Julia)           Log(format("Real: {:.5f}, Imaginary: {:.5f}", real, imaginary));
+        else if (fractalType == FractalType::Multibrot)  Log(format("Multibrot exponent: {:.5f}", MultibrotExponent));
+        else if (fractalType == FractalType::Mandelbrot) Log(format("Mandelbrot"));
         vector<uint8> image(width * height * 4);
         for (int32 i = 0; i < width; i++)
         {
@@ -218,10 +231,11 @@ int32 main()
                 float64 x = ((float64)i / (float64)width) * 4 + -2;
                 float64 y = ((float64)j / (float64)height) * 4 + -2;
 
-                x -= offsetX;
-                y -= offsetY;
                 x /= scaleX;
                 y /= scaleY;
+
+                x += offsetX;
+                y += offsetY;
 
                 if (adjustForAspectRatio)
                     x *= (float64)width / (float64)height;
