@@ -1,1 +1,3 @@
-- Allow making animations
+- Make it use OpenGL
+- Make UI - Similar to blender
+- Add 3D fractals with ray marching
