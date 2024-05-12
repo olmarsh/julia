@@ -241,11 +241,11 @@ int32 main()
                 x /= scaleX;
                 y /= scaleY;
 
-                x += offsetX;
-                y += offsetY;
-
                 if (adjustForAspectRatio)
                     x *= (float64)width / (float64)height;
+
+                x += offsetX;
+                y += offsetY;
 
                 // Compute for current pixel
                 float64 result;
